@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: web
+spec:
+    selector:
+        matchLabels:
+            name: web
+    serviceName: "web"
+    template:
+        metadata:
+            labels:
+                name: web
+        spec:
+            containers:
+                - name: web
+                  image: yourimage:yourtag
+                  imagePullPolicy: IfNotPresent
+                  env:
+                    - name: SOME_ENV
+                      value: "/some-value"
+                  envFrom:
+                    - secretRef:
+                        name: web-secrets
+                  ports:
+                    - containerPort: 5003
+                      name: http
+                      protocol: TCP
+                  resources:
+                    limits:
+                        cpu: 500m
+                        memory: 256Mi
+                    requests:
+                        cpu: 500m
+                        memory: 256Mi
+                  volumeMounts:
+                    - name: web
+                      mountPath: /state/
+    volumeClaimTemplates:
+        - metadata:
+            name: web
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            storageClassName: "openebs-zfspv"
+            resources:
+                requests:
+                    storage: 10Gi

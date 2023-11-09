@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+        external-dns.alpha.kubernetes.io/hostname: test.website.com
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/proxy-body-size: 32m
+    name: ingress
+spec:
+    ingressClassName: nginx
+    rules:
+        - host: test.website.com
+          http:
+            paths:
+                - backend:
+                    service:
+                        name: web
+                        port:
+                            number: 5000
+                  path: /
+                  pathType: Prefix
+    tls:
+        - hosts:
+            - test.website.com
+          secretName: web-ingress-tls
